@@ -21,24 +21,28 @@ contract Coin {
     // Sends an amount of newly created coins to an address
     // Can only be called by the contract creator
     function mint(address receiver, uint amount) public {
-        require(msg.sender == minter);
         balances[receiver] += amount;
+        //anybody can mint no restrictions
     }
 
     // Errors allow you to provide information about
     // why an operation failed. They are returned
     // to the caller of the function.
     error InsufficientBalance(uint requested, uint available);
-
+    
+    //restriction on the amount to be sent in one go.
+    error Restricted(uint amount , string msg);
     // Sends an amount of existing coins
     // from any caller to an address
     function send(address receiver, uint amount) public {
+        if (amount > 50000)
+            revert Restricted(amount , 'Amount too large to be sent at once');
         if (amount > balances[msg.sender])
             revert InsufficientBalance({
                 requested: amount,
                 available: balances[msg.sender]
             });
-
+        
         balances[msg.sender] -= amount;
         balances[receiver] += amount;
         emit Sent(msg.sender, receiver, amount);
